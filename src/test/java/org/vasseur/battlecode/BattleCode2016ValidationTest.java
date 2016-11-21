@@ -12,7 +12,7 @@ import org.vasseur.battlecode.IBattleCode2016;
 
 @RunWith(ScoreBlockJUnit4ClassRunner.class)
 //@Persist(Couchbase.class)
-public class BattleCode2016Test {
+public class BattleCode2016ValidationTest {
 
 
     @InjectImpl
