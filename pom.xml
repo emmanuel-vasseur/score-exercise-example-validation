@@ -6,7 +6,6 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<team></team>
 	</properties>
 
     <groupId>org.vasseur</groupId>
@@ -20,12 +19,6 @@
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>org.vasseur</groupId>
-			<artifactId>battlecode-2016-${team}-impl</artifactId>
-			<version>0.1-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.soneira</groupId>
 			<artifactId>score-junit</artifactId>
 			<version>0.1-SNAPSHOT</version>
@@ -33,4 +26,21 @@
 		</dependency>
 	</dependencies>
 
+	<profiles>
+		<profile>
+			<activation>
+				<property>
+					<name>team</name>
+				</property>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>org.vasseur</groupId>
+					<artifactId>battlecode-2016-${team}-impl</artifactId>
+					<version>0.1-SNAPSHOT</version>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
 </project>
