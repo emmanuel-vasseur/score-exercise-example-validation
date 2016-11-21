@@ -1,7 +1,8 @@
 job('Seed-configuration') {
     scm {
-        git('C:/Applications/Workspace/score-exercise-example-validation')
-//        git('https://github.com/emmanuel-vasseur/score-exercise-example-validation.git')
+        git("true".equalsIgnoreCase(System.getenv('LOCAL_SEED')) ?
+                'C:/Applications/Workspace/score-exercise-example-validation' :
+                'https://github.com/emmanuel-vasseur/score-exercise-example-validation.git')
     }
     triggers {
         cron('H * * * *')
@@ -20,7 +21,9 @@ job('Seed-configuration') {
 
 job('Build-battlecode-framework') {
     scm {
-        git('https://github.com/2nis6mon/score-project.git')
+        git("true".equalsIgnoreCase(System.getenv('LOCAL_SEED')) ?
+                'C:/Applications/Workspace/score-project' :
+                'https://github.com/2nis6mon/score-project.git')
     }
     triggers {
         scm('H/5 * * * *')
@@ -32,8 +35,9 @@ job('Build-battlecode-framework') {
 
 job('Build-battlecode-exercise') {
     scm {
-        git('C:/Applications/Workspace/score-exercise-example')
-//        git('https://github.com/emmanuel-vasseur/score-exercise-example.git')
+        git("true".equalsIgnoreCase(System.getenv('LOCAL_SEED')) ?
+                'C:/Applications/Workspace/score-exercise-example' :
+                'https://github.com/emmanuel-vasseur/score-exercise-example.git')
     }
     triggers {
         scm('H/5 * * * *')
@@ -48,8 +52,9 @@ hudson.model.User.all.findAll{ user ->
 }.each { user ->
 	job("Build-battlecode-${user.id}-implementation") {
 		scm {
-			git("C:/Applications/Workspace/score-exercise-${user.id}-impl")
-//			git("https://github.com/emmanuel-vasseur/score-exercise-${user.id}-impl.git")
+			git("true".equalsIgnoreCase(System.getenv('LOCAL_SEED')) ?
+					"C:/Applications/Workspace/score-exercise-${user.id}-impl" :
+					"https://github.com/emmanuel-vasseur/score-exercise-${user.id}-impl.git")
 		}
 		steps {
 			maven {
@@ -65,8 +70,9 @@ hudson.model.User.all.findAll{ user ->
 
 	job("Build-battlecode-${user.id}-validation") {
 		scm {
-			git('C:/Applications/Workspace/score-exercise-example-validation')
-//			git('https://github.com/emmanuel-vasseur/score-exercise-example-validation.git')
+			git("true".equalsIgnoreCase(System.getenv('LOCAL_SEED')) ?
+					'C:/Applications/Workspace/score-exercise-example-validation' :
+					'https://github.com/emmanuel-vasseur/score-exercise-example-validation.git')
 		}
 		wrappers {
 			timeout {
