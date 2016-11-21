@@ -1,45 +1,85 @@
-job('Build-exercise') {
-    scm {
-        git('https://github.com/2nis6mon/score-project.git')
-    }
-//    triggers {
-//        scm('H/15 * * * *')
-//    }
-    steps {
-        maven('clean install -Dmaven.test.failure.ignore')
-    }
-}
+import hudson.model.User
 
-job('Build-implementation') {
+job('Seed-configuration') {
     scm {
-        git('https://github.com/2nis6mon/score-project.git')
+        git('C:/Applications/Workspace/score-exercise-example-validation')
+//        git('https://github.com/emmanuel-vasseur/score-exercise-example-validation.git')
+    }
+    triggers {
+        cron('H * * * *')
+        scm('H/5 * * * *')
     }
     steps {
-        maven {
-			rootPOM('score-exercise-example-impl/pom.xml')
-			goals('clean install')
-			properties('maven.test.skip': true)
-			//localRepository(javaposse.jobdsl.dsl.helpers.LocalRepositoryLocation.LOCAL_TO_WORKSPACE)
-		}
-    }
-}
-
-job('Build-validation') {
-    scm {
-        git('https://github.com/2nis6mon/score-project.git')
-    }
-    wrappers {
-		timeout {
-			absolute(2)
-			failBuild()
-			writeDescription('Build failed due to a long/stuck build time')
+		jobDsl {
+			targets('src/main/config/jenkins/jobs.groovy')
+			removedJobAction('DELETE')
+			removedViewAction('DELETE')
+			failOnMissingPlugin(true)
+			unstableOnDeprecation(true)
 		}
 	}
-    steps {
-        maven {
-			rootPOM('score-exercise-example-validation/pom.xml')
-			goals('clean test')
-			properties('maven.test.failure.ignore': true)
-		}
+}
+
+job('Build-battlecode-framework') {
+    scm {
+        git('https://github.com/2nis6mon/score-project.git')
     }
+    triggers {
+        scm('H/5 * * * *')
+    }
+    steps {
+        maven('clean install')
+    }
+}
+
+job('Build-battlecode-exercise') {
+    scm {
+        git('C:/Applications/Workspace/score-exercise-example')
+//        git('https://github.com/emmanuel-vasseur/score-exercise-example.git')
+    }
+    triggers {
+        scm('H/5 * * * *')
+    }
+    steps {
+        maven('clean install')
+    }
+}
+
+User.getAll().findAll{ it.id != 'admin' }.each { user ->
+	job("Build-battlecode-${user.id}-implementation") {
+		scm {
+			git("C:/Applications/Workspace/score-exercise-${user.id}-impl")
+//			git("https://github.com/emmanuel-vasseur/score-exercise-${user.id}-impl.git")
+		}
+		steps {
+			maven {
+				goals('clean verify')
+				properties('maven.test.skip': true)
+			}
+			maven {
+				goals('install:install-file')
+				properties(groupId: 'org.vasseur', artifactId: "battlecode-2016-${user.id}-impl", version: '0.1-SNAPSHOT', pomFile: 'pom.xml')
+			}
+		}
+	}
+
+	job("Build-battlecode-${user.id}-validation") {
+		scm {
+			git('C:/Applications/Workspace/score-exercise-example-validation')
+//			git('https://github.com/emmanuel-vasseur/score-exercise-example-validation.git')
+		}
+		wrappers {
+			timeout {
+				absolute(2)
+				failBuild()
+				writeDescription('Build failed due to a long/stuck build time')
+			}
+		}
+		steps {
+			maven {
+				goals('clean test')
+				properties('maven.test.failure.ignore': true, 'team': user.id)
+			}
+		}
+	}
 }
