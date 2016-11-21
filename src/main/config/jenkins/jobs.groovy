@@ -54,11 +54,11 @@ hudson.model.User.all.findAll{ user ->
 		steps {
 			maven {
 				goals('clean verify')
-				properties('maven.test.skip': true)
+				properties('maven.test.skip': true, 'jar.finalName': "battlecode-2016-${user.id}-impl")
 			}
 			maven {
 				goals('install:install-file')
-				properties(groupId: 'org.vasseur', artifactId: "battlecode-2016-${user.id}-impl", version: '0.1-SNAPSHOT', pomFile: 'pom.xml')
+				properties(file: "target/battlecode-2016-${user.id}-impl.jar", groupId: 'org.vasseur', artifactId: "battlecode-2016-${user.id}-impl", version: '0.1-SNAPSHOT', pomFile: 'pom.xml')
 			}
 		}
 	}
