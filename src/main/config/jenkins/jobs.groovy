@@ -1,5 +1,3 @@
-import hudson.model.User
-
 job('Seed-configuration') {
     scm {
         git('C:/Applications/Workspace/score-exercise-example-validation')
@@ -45,7 +43,9 @@ job('Build-battlecode-exercise') {
     }
 }
 
-User.getAll().findAll{ it.id != 'admin' }.each { user ->
+hudson.model.User.all.findAll{ user ->
+	user.id != 'admin' && user.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details) != null
+}.each { user ->
 	job("Build-battlecode-${user.id}-implementation") {
 		scm {
 			git("C:/Applications/Workspace/score-exercise-${user.id}-impl")
