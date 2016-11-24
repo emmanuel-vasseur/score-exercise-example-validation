@@ -49,9 +49,6 @@ def getTeams() {
 
 pipelineJob('Run-battlecode-validation') {
 	concurrentBuild false
-    triggers {
-        cron '*/5 * * * *'
-    }
 	definition {
 		cps {
 			sandbox true
