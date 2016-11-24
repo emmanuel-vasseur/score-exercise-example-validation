@@ -1,6 +1,6 @@
 job('Seed-configuration') {
     scm {
-        git 'D:/dev/workspace-neon/score-exercise-example-validation'
+        git 'https://github.com/emmanuel-vasseur/score-exercise-example-validation'
     }
     triggers {
         cron '0 * * * *'
@@ -41,25 +41,42 @@ job('Build-battlecode-exercise') {
     }
 }
 
-hudson.model.User.all.findAll{ team ->
-	team.id != 'admin' && team.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details) != null
-}.each { team ->
-	pipelineJob("${team.id}-Battlecode-Build") {
+def getTeams() {
+	hudson.model.User.all.findAll{ team ->
+		team.id != 'admin' && team.getProperty(hudson.security.HudsonPrivateSecurityRealm.Details) != null
+	}*.id
+}
+
+pipelineJob('Run-battlecode-validation') {
+	concurrentBuild false
+    triggers {
+        cron '*/5 * * * *'
+    }
+	definition {
+		cps {
+			sandbox true
+			script "${getTeams().collect{ team -> "build job: 'Validate-$team-battlecode-implementation', wait: false" }.join('\n')}"
+		}
+	}
+}
+
+getTeams().each { team ->
+	pipelineJob("Validate-$team-battlecode-implementation") {
 		concurrentBuild false
 		definition {
 			cps {
 				sandbox true
 				script """\
 node {
-	stage('Clone ${team.id} repository') {
-		git 'https://github.com/emmanuel-vasseur/score-exercise-${team.id}-impl.git'
+	stage('Clone $team repository') {
+		git 'https://github.com/emmanuel-vasseur/score-exercise-$team-impl.git'
 	}
 	stage('Build implementation') {
-		maven 'clean verify', ['maven.test.skip': true, 'jar.finalName': 'battlecode-2016-${team.id}-impl']
+		maven 'clean verify', ['maven.test.skip': true, 'jar.finalName': 'battlecode-2016-$team-impl']
 	}
 	stage('Publish implementation') {
-		maven 'install:install-file', [file: 'target/battlecode-2016-${team.id}-impl.jar',
-				groupId: 'org.vasseur', artifactId: 'battlecode-2016-${team.id}-impl',
+		maven 'install:install-file', [file: 'target/battlecode-2016-$team-impl.jar',
+				groupId: 'org.vasseur', artifactId: 'battlecode-2016-$team-impl',
 				version: '0.1-SNAPSHOT', pomFile: 'pom.xml']
 	}
 	stage('Clone validation repository') {
@@ -68,7 +85,7 @@ node {
 	}
 	stage('Validation implementation') {
 		timeout(2) {
-			maven 'clean test', ['maven.test.failure.ignore': true, team: '${team.id}']
+			maven 'clean test', ['maven.test.failure.ignore': true, team: '$team']
 		}
 	}
 }
