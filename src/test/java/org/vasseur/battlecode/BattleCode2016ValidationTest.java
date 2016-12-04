@@ -1,17 +1,18 @@
 package org.vasseur.battlecode;
 
-import org.soneira.score.junit.annotations.Persist;
-import org.soneira.score.junit.ScoreBlockJUnit4ClassRunner;
-import org.soneira.score.junit.annotations.InjectImpl;
-import org.soneira.score.junit.annotations.Score;
-import org.soneira.score.junit.persistence.Couchbase;
 import org.fest.assertions.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.vasseur.battlecode.IBattleCode2016;
 
+import com.dojocoders.score.junit.ScoreBlockJUnit4ClassRunner;
+import com.dojocoders.score.junit.annotations.InjectImpl;
+import com.dojocoders.score.junit.annotations.Persist;
+import com.dojocoders.score.junit.annotations.Score;
+import com.dojocoders.score.junit.persistence.ScoreApiRest;
+
 @RunWith(ScoreBlockJUnit4ClassRunner.class)
-//@Persist(Couchbase.class)
+@Persist(ScoreApiRest.class)
 public class BattleCode2016ValidationTest {
 
 
