@@ -4,9 +4,9 @@ node {
 	}
 	stage('Build implementation') {
 		timeout(2) {
-			maven 'clean cobertura:cobertura verify', ['maven.test.failure.ignore': true,
-					'jar.finalName': "battlecode-2016-$team-impl", 'cobertura.report.format': 'xml']
+			maven 'clean cobertura:cobertura', ['maven.test.failure.ignore': true, 'cobertura.report.format': 'xml']
 		}
+		maven 'verify', ['maven.test.skip': true, 'jar.finalName': "battlecode-2016-$team-impl"]
 	}
 	def buildMetrics
 	stage('Publish implementation') {
