@@ -60,46 +60,15 @@ pipelineJob('Run-battlecode-validation') {
 getTeams().each { team ->
 	pipelineJob("Validate-$team-battlecode-implementation") {
 		concurrentBuild false
-		definition {
-			cps {
-				sandbox true
-				script """\
-node {
-	stage('Clone $team repository') {
-		git 'https://github.com/emmanuel-vasseur/score-exercise-$team-impl.git'
-	}
-	stage('Build implementation') {
-		maven 'clean verify', ['maven.test.skip': true, 'jar.finalName': 'battlecode-2016-$team-impl']
-	}
-	stage('Publish implementation') {
-		maven 'install:install-file', [file: 'target/battlecode-2016-$team-impl.jar',
-				groupId: 'org.vasseur', artifactId: 'battlecode-2016-$team-impl',
-				version: '0.1-SNAPSHOT', pomFile: 'pom.xml']
-	}
-	stage('Clone validation repository') {
-		deleteDir()
-		git 'https://github.com/emmanuel-vasseur/score-exercise-example-validation.git'
-	}
-	stage('Validation implementation') {
-		timeout(2) {
-			maven 'clean test', ['maven.test.failure.ignore': true, team: '$team']
+		parameters {
+			stringParam('team', team)
 		}
-	}
-}
-""" + '''\
-def Closure maven(task, properties) {
-	def mavenCommandLine = "mvn -B $task ${joinProperties(properties)}"
-	if(isUnix()) {
-		sh mavenCommandLine
-	} else {
-		bat mavenCommandLine
-	}
-}
-@NonCPS
-def joinProperties(properties) {
-    properties.collect{ key, value -> "\\\"-D$key=$value\\\"" }.join(' ')
-}
-'''
+		definition {
+			cpsScm {
+				scm {
+					git 'https://github.com/emmanuel-vasseur/score-exercise-example-validation'
+				}
+				scriptPath ('src/main/config/jenkins/pipeline-validation.groovy')
 			}
 		}
 	}
